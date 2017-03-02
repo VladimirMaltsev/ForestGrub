@@ -2,7 +2,8 @@ package TreeLib
 
 import java.util.*
 
-class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) : Tree<Key, Data> {
+class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) : Tree<Key, Data>, Iterable<RBNode<Key, Data>> {
+
     override fun insert(key: Key, data: Data) {
         var newNode: RBNode<Key, Data> = RBNode(key, data)
 
@@ -35,18 +36,14 @@ class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) :
     override fun search(key: Key): Data? {
         var currNode: RBNode<Key, Data>? = root
 
-        while (currNode != null) {
-            if (currNode.key == key)
-                return currNode.data
+    while (currNode != null) {
+        if (currNode.key == key) return currNode.data
 
-            if (currNode.key > key)
-                currNode = currNode.leftChild
-            else
-                currNode = currNode.rightChild
-        }
-
-        return null
+        currNode = if (currNode.key > key) currNode.leftChild else currNode.rightChild
     }
+
+    return null
+}
 
     override fun remove(key: Key): Boolean {
         var victimNode = root
@@ -60,6 +57,7 @@ class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) :
 
         //определение узла, который будет удален
         var deletedNode: RBNode<Key, Data>? = victimNode
+
         if ((deletedNode!!.leftChild != null) && (deletedNode.rightChild != null)) {
             deletedNode = victimNode.rightChild
             while (deletedNode!!.leftChild != null)
@@ -303,5 +301,51 @@ class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) :
             isNull = false
         }
         node?.isRed = false
+    }
+
+    public override fun iterator(): Iterator<RBNode<Key, Data>> {
+        return (object : Iterator<RBNode<Key, Data>>{
+            var next = getMax()
+            var countRoot = 0
+            override fun hasNext(): Boolean {
+                //println("я в hasNext()")
+                return next != null
+            }
+
+            override fun next(): RBNode<Key, Data> {
+                //println("я в next()")
+                var retNode = next
+                next = getNextNode(next)
+
+                return retNode!!
+            }
+
+            private fun getNextNode (arg: RBNode<Key, Data>?) : RBNode<Key, Data>?{
+                var node = arg;
+
+                if (node!!.leftChild != null)
+                    node = getMax(node.leftChild)
+                else {
+                    while (node != root && node == node!!.parent!!.leftChild)
+                        node = node.parent
+                    node = node!!.parent
+                }
+                return node
+            }
+        })
+    }
+
+    private fun getMax(defaultNode: RBNode<Key, Data>? = root) : RBNode<Key, Data>? {
+        var maxNode = defaultNode;
+        while (maxNode!!.rightChild != null)
+            maxNode = maxNode.rightChild
+        return maxNode
+    }
+
+    private fun getMin() : RBNode<Key, Data>? {
+        var minNode = root;
+        while (minNode!!.leftChild != null)
+            minNode = minNode.leftChild
+        return minNode
     }
 }
