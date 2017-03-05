@@ -22,20 +22,29 @@ class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
     }
 
     public fun printTree(case: Int) {
-        when (case) {
-            POSTORDER -> {
+        when (case)
+        {
+            POSTORDER ->
+            {
                 val iterator = tree.iterator(getNextPostOrder)
-                while (iterator.hasNext()) {
+                while (iterator.hasNext())
+                {
                     var node = iterator.next()
-                    println("${node.data}${if (node.isRed) "r" else "b"} ")
+
+                    for (i in 1..tree.getNodeHeightByKey(node.key))
+                        print("  ")
+
+                    var spec_symbol = "";
+
+                    if (node.parent != null)
+                        if (node == node.parent!!.leftChild)
+                            spec_symbol = "\\"
+                        else
+                            spec_symbol = "/"
+
+                    println("$spec_symbol${27.toChar()}${if (node.isRed) "[31m" else "[1m"}${node.data}${27.toChar()}[0m")
                 }
             }
         }
     }
 }
-//    public fun printTree(orderNext : (RBNode<Key, Data>?) -> RBNode<Key, Data>?){
-//        val iterator = tree.iterator(orderNext)
-//        while (iterator.hasNext()){
-//            print("${iterator.next().data} ")
-//        }
-//    }
