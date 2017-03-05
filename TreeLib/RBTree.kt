@@ -105,24 +105,6 @@ class RBTree<Key : Comparable<Key>, Data>(private var root: RBNode<Key, Data>? =
         return true
     }
 
-    fun printPostOrder(curNode: RBNode<Key, Data>? = root, divider: String = "") {
-        if (curNode == null)
-            return
-        var spec_symbol = "";
-        if (curNode.parent != null)
-            if (curNode == curNode.parent!!.leftChild)
-                spec_symbol = "\\"
-            else
-                spec_symbol = "/"
-
-        printPostOrder(curNode.rightChild, divider + "   ")
-        var color: String = "b"
-        if (curNode.isRed)
-            color = "r"
-        println("$divider$spec_symbol${curNode.data}$color")
-        printPostOrder(curNode.leftChild, divider + "   ")
-    }
-
     private fun rotateLeft(centerNode: RBNode<Key, Data>) {
         val heirNode = centerNode.rightChild
         centerNode.rightChild = heirNode!!.leftChild
@@ -277,8 +259,6 @@ class RBTree<Key : Comparable<Key>, Data>(private var root: RBNode<Key, Data>? =
         node?.isRed = false
     }
 
-
-
     public fun iterator(getNextFun : (RBNode<Key, Data>?) -> RBNode<Key, Data>?) : Iterator<RBNode<Key, Data>>
     {
         getNextNode = getNextFun;
@@ -328,5 +308,17 @@ class RBTree<Key : Comparable<Key>, Data>(private var root: RBNode<Key, Data>? =
         while (minNode!!.leftChild != null)
             minNode = minNode.leftChild
         return minNode
+    }
+
+    public fun getNodeHeightByKey(key: Key) : Int
+    {
+        var height = 0
+        var currNode = root
+        while (currNode != null && currNode.key != key)
+        {
+            currNode = if (key > currNode.key) currNode.rightChild else currNode.leftChild
+            height ++
+        }
+        return height
     }
 }
