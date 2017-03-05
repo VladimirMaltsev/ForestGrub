@@ -21,16 +21,21 @@ class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
         node
     }
 
-    public fun printTree (case : Int){
-        when (case){
-            POSTORDER -> printTree(getNextPostOrder)
-        }
-    }
-
-    public fun printTree(orderNext : (RBNode<Key, Data>?) -> RBNode<Key, Data>?){
-        val iterator = tree.iterator(orderNext)
-        while (iterator.hasNext()){
-            print("${iterator.next().data} ")
+    public fun printTree(case: Int) {
+        when (case) {
+            POSTORDER -> {
+                val iterator = tree.iterator(getNextPostOrder)
+                while (iterator.hasNext()) {
+                    var node = iterator.next()
+                    println("${node.data}${if (node.isRed) "r" else "b"} ")
+                }
+            }
         }
     }
 }
+//    public fun printTree(orderNext : (RBNode<Key, Data>?) -> RBNode<Key, Data>?){
+//        val iterator = tree.iterator(orderNext)
+//        while (iterator.hasNext()){
+//            print("${iterator.next().data} ")
+//        }
+//    }
