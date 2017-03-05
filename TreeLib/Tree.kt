@@ -1,6 +1,6 @@
 package TreeLib
 
-interface Tree <Key : Comparable<Key>, Data>{
+interface Tree <Key : Comparable<Key>, Data> {
 
         fun insert(key: Key, data: Data)
 

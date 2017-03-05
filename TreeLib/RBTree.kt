@@ -2,7 +2,21 @@ package TreeLib
 
 import java.util.*
 
-class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) : Tree<Key, Data>, Iterable<RBNode<Key, Data>> {
+class RBTree<Key : Comparable<Key>, Data>(private var root: RBNode<Key, Data>? = null) : Tree<Key, Data>, Iterable<RBNode<Key, Data>>
+{
+
+    var getNextNode: (RBNode<Key, Data>?) -> RBNode<Key, Data>? = {
+        var node = it;
+
+        if (node!!.leftChild != null)
+            node = getMax(node.leftChild)
+        else {
+            while (node != root && node == node!!.parent!!.leftChild)
+                node = node.parent
+            node = node!!.parent
+        }
+        node
+    }
 
     override fun insert(key: Key, data: Data) {
         var newNode: RBNode<Key, Data> = RBNode(key, data)
@@ -107,46 +121,6 @@ class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) :
             color = "r"
         println("$divider$spec_symbol${curNode.data}$color")
         printPostOrder(curNode.leftChild, divider + "   ")
-    }
-
-    fun printLevelOrder() {
-        if (root == null) {
-            println("TreeLib.Tree is empty"); return
-        }
-
-        var queueNodes: Queue<RBNode<Key, Data>> = LinkedList<RBNode<Key, Data>>()
-        var queueChars: Queue<String> = LinkedList<String>()
-
-        var special: String = "\n"
-        var plain: String = " "
-
-        queueNodes.add(root)
-        queueChars.add(special)
-
-        while (!queueNodes.isEmpty()) {
-
-            var currNode = queueNodes.poll()
-
-            print("${currNode.data}${queueChars.peek()}")
-            if (currNode.leftChild != null) queueNodes.add(currNode.leftChild)
-            if (currNode.rightChild != null) queueNodes.add(currNode.rightChild)
-
-            if (queueChars.poll().compareTo("\n") == 0) {
-                plain += " "
-                special = "\n"
-            } else special = plain
-
-            if (currNode.leftChild != null && currNode.rightChild != null) {
-                queueChars.add(plain)
-                queueChars.add(special)
-            } else {
-                if (currNode.leftChild != null || currNode.rightChild != null)
-                    queueChars.add(plain + special)
-                else
-                    queueChars.add(plain + special)
-            }
-
-        }
     }
 
     private fun rotateLeft(centerNode: RBNode<Key, Data>) {
@@ -303,47 +277,54 @@ class RBTree<Key : Comparable<Key>, Data>(var root: RBNode<Key, Data>? = null) :
         node?.isRed = false
     }
 
-    public override fun iterator(): Iterator<RBNode<Key, Data>> {
-        return (object : Iterator<RBNode<Key, Data>>{
+
+
+    public fun iterator(getNextFun : (RBNode<Key, Data>?) -> RBNode<Key, Data>?) : Iterator<RBNode<Key, Data>>
+    {
+        getNextNode = getNextFun;
+        return iterator()
+    }
+
+    public override fun iterator(): Iterator<RBNode<Key, Data>>
+    {
+        return (object : Iterator<RBNode<Key, Data>>
+        {
             var next = getMax()
-            var countRoot = 0
-            override fun hasNext(): Boolean {
-                //println("я в hasNext()")
+
+            override fun hasNext(): Boolean
+            {
                 return next != null
             }
 
-            override fun next(): RBNode<Key, Data> {
-                //println("я в next()")
+            override fun next(): RBNode<Key, Data>
+            {
                 var retNode = next
                 next = getNextNode(next)
 
                 return retNode!!
             }
-
-            private fun getNextNode (arg: RBNode<Key, Data>?) : RBNode<Key, Data>?{
-                var node = arg;
-
-                if (node!!.leftChild != null)
-                    node = getMax(node.leftChild)
-                else {
-                    while (node != root && node == node!!.parent!!.leftChild)
-                        node = node.parent
-                    node = node!!.parent
-                }
-                return node
-            }
         })
     }
 
-    private fun getMax(defaultNode: RBNode<Key, Data>? = root) : RBNode<Key, Data>? {
+    public fun getMax(defaultNode: RBNode<Key, Data>? = root) : RBNode<Key, Data>?
+    {
         var maxNode = defaultNode;
+
+        if (maxNode == null)
+            return null
+
         while (maxNode!!.rightChild != null)
             maxNode = maxNode.rightChild
         return maxNode
     }
 
-    private fun getMin() : RBNode<Key, Data>? {
+    public fun getMin(defaultNode: RBNode<Key, Data>? = root) : RBNode<Key, Data>?
+    {
         var minNode = root;
+
+        if (minNode == null)
+            return null
+
         while (minNode!!.leftChild != null)
             minNode = minNode.leftChild
         return minNode
