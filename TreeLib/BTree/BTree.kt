@@ -54,8 +54,25 @@ class BTree<Key : Comparable<Key>, Data> {
     }
 
     fun insert_fallout(currNode: BNode<Key, Data>, key: Key, data: Data) {
+        var i = currNode.keys.size - 1
         if (currNode.isLeaf()) {
+            while (i >= 0 && key < currNode.keys.get(i))
+                i--
+            i++
+            currNode.keys.add(i, key)
+            currNode.data.add(i, data)
+        } else {
+            while (i >= 0 && key < currNode.keys.get(i))
+                i--
+            i++
+            if (currNode.children.get(i).isFull()) {
+                splitNode(currNode, i, currNode.children.get(i))
+                if (key > currNode.keys.get(i)) {
+                    i++
+                }
+            }
 
+            insert_fallout(currNode.children.get(i), key, data)
         }
     }
 
