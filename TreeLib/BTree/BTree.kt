@@ -1,12 +1,14 @@
 package BTreeLib
 
+import java.util.*
+
 
 class BTree<Key : Comparable<Key>, Data> {
 
     private var root: BNode<Key, Data> = BNode()
 
     companion object {
-        public const val MIN_DIG: Int = 5
+        public const val MIN_DIG: Int = 3
     }
 
     fun isEmpty() = root.keys.size == 0
@@ -28,13 +30,13 @@ class BTree<Key : Comparable<Key>, Data> {
 
     fun splitNode(parent: BNode<Key, Data>, i_median: Int, splitChild: BNode<Key, Data>) {
         var bro_node = BNode<Key, Data>()
-        for (ind in 0..MIN_DIG - 2) {
+        for (ind in MIN_DIG - 2..0) {
             bro_node.keys.add(splitChild.keys.removeAt(ind + MIN_DIG)) //очень тяжелая операция
             bro_node.data.add(splitChild.data.removeAt(ind + MIN_DIG))
         }
 
         if (!parent.isLeaf()) {
-            for (ind in 0..MIN_DIG)
+            for (ind in MIN_DIG..0)
                 bro_node.children.add(splitChild.children.removeAt(ind + MIN_DIG - 1))
         }
 
@@ -73,6 +75,19 @@ class BTree<Key : Comparable<Key>, Data> {
             }
 
             insert_fallout(currNode.children.get(i), key, data)
+        }
+    }
+
+    fun printTree() {
+        var list: Queue<BNode<Key, Data>> = LinkedList()
+        list.add(root)
+        while (!list.isEmpty()) {
+            var curNode = list.poll()
+            for (child in curNode.children)
+                list.add(child)
+
+            for (key in curNode.keys)
+                print(" $key ")
         }
     }
 
