@@ -30,18 +30,19 @@ class BTree<Key : Comparable<Key>, Data> {
 
     fun splitNode(parent: BNode<Key, Data>, i_median: Int, splitChild: BNode<Key, Data>) {
         var bro_node = BNode<Key, Data>()
-        for (ind in MIN_DIG - 2..0) {
-            bro_node.keys.add(splitChild.keys.removeAt(ind + MIN_DIG)) //очень тяжелая операция
-            bro_node.data.add(splitChild.data.removeAt(ind + MIN_DIG))
+        for (ind in 0..MIN_DIG - 2) {
+            bro_node.keys.add(0, splitChild.keys.removeAt(splitChild.keys.size - 1)) //очень тяжелая операция
+            bro_node.data.add(0, splitChild.data.removeAt(splitChild.data.size - 1))
         }
 
-        if (!parent.isLeaf()) {
-            for (ind in MIN_DIG..0)
-                bro_node.children.add(splitChild.children.removeAt(ind + MIN_DIG - 1))
+        if (!splitChild.isLeaf()) {
+            for (ind in 0..MIN_DIG)
+                bro_node.children.add(0, splitChild.children.removeAt(splitChild.children.size - 1))
         }
 
         parent.children.add(i_median + 1, bro_node)
         parent.keys.add(i_median, splitChild.keys.removeAt(MIN_DIG - 1))
+        parent.data.add(i_median, splitChild.data.removeAt(MIN_DIG - 1))
     }
 
     fun insert(key: Key, data: Data) {
@@ -80,15 +81,33 @@ class BTree<Key : Comparable<Key>, Data> {
 
     fun printTree() {
         var list: Queue<BNode<Key, Data>> = LinkedList()
+        var listChar: Queue<Char> = LinkedList()
+
         list.add(root)
+        listChar.add('\n')
+
+        var specSymbol = '\n'
+
         while (!list.isEmpty()) {
             var curNode = list.poll()
-            for (child in curNode.children)
-                list.add(child)
 
             for (key in curNode.keys)
                 print(" $key ")
+
+            if (!curNode.isLeaf()) {
+                for (child in curNode.children) {
+                    list.add(child)
+                    listChar.add('|')
+                }
+            }
+            if (listChar.peek() == '\n') {
+                listChar.add(specSymbol)
+                print(listChar.poll())
+            }
+            print(listChar.poll())
         }
+
     }
+
 
 }
