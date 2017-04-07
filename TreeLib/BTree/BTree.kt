@@ -100,19 +100,31 @@ class BTree<Key : Comparable<Key>, Data> {
     }
 
     fun remove (key: Key, currNode : BNode<Key, Data> = root) {
+        println(key)
+
+        //находим ключ который >= key
         var i = 0
         while (i < currNode.keys.size && key > currNode.keys[i]) {
             i++
         }
 
+        //в случае если ключ найден
+
         if (i < currNode.keys.size && key == currNode.keys[i])
         {
+            //если лист то просто удаляем
+
             if (currNode.isLeaf()) {
+                println("I'm leaf")
                 currNode.keys.removeAt(i)
                 currNode.data.removeAt(i)
             } else {
+
+                //иначе ищем приемника
+
                 var node_victim = currNode
 
+                //попытка отжать ключ у левого ребенка
                 if (node_victim.children[i].keys.size >= MIN_DIG) {
                     node_victim = node_victim.children[i]
                     while (!node_victim!!.isLeaf()) {
@@ -128,6 +140,7 @@ class BTree<Key : Comparable<Key>, Data> {
                     currNode.data[i] = new_data
 
                 } else {
+                    //пытаемся отжать ключ у правого потомка
                     if (node_victim.children[i + 1].keys.size >= MIN_DIG) {
                         node_victim = node_victim.children[i + 1]
                         while (!node_victim!!.isLeaf()) {
@@ -141,6 +154,7 @@ class BTree<Key : Comparable<Key>, Data> {
                         currNode.keys[i] = new_key
                         currNode.data[i] = new_data
                     } else {
+                        //если оба ребенка оказались малышами, то мерджим их
                         currNode.children[i].keys.add(currNode.keys[i])
                         currNode.children[i].data.add(currNode.data[i])
 
@@ -160,48 +174,82 @@ class BTree<Key : Comparable<Key>, Data> {
                     }
                 }
             }
-        } else {
+        } else { //если же ключ не найден
+
+            //если лист - все плохо его нет
             if (currNode.isLeaf())
                 return
 
+            //далее мы должны пойти в ребенка с индексом i
+            //при этом мы должны быть уверены, что удалив там ключ, у нас не нарушится структура,
+            //поэтому надо следить за тем, чтобы ключей в каждой вершине по пути следования было
+            // >= чем минимальная степень дерева
+
             if (currNode.children[i].keys.size < BTree.MIN_DIG) {
-                if (i < currNode.children.size && currNode.children[i + 1].keys.size >= BTree.MIN_DIG) {
+
+                //пытаемся подрезать ключ у правого соседа
+                //если мы сами не являемся ультраправыми
+                if (i + 1 < currNode.children.size && currNode.children[i + 1].keys.size >= BTree.MIN_DIG) {
                     var key_parent = currNode.keys[i]
                     var data_parent = currNode.data[i]
 
-                    currNode.keys.add(i, currNode.children[i + 1].keys.removeAt(0))
-                    currNode.data.add(i, currNode.children[i + 1].data.removeAt(0))
+                    currNode.keys[i] = currNode.children[i + 1].keys.removeAt(0)
+                    currNode.data[i] = currNode.children[i + 1].data.removeAt(0)
 
                     currNode.children[i].keys.add(key_parent)
                     currNode.children[i].data.add(data_parent)
-
                     currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
+                    remove(key, currNode)
                 } else
+
+                    //у правого не получилось, может у левого получиться
                     if (i - 1 >= 0 && currNode.children[i - 1].keys.size >= BTree.MIN_DIG) {
                         var key_parent = currNode.keys[i - 1]
                         var data_parent = currNode.data[i - 1]
 
-                        currNode.keys.add(i - 1, currNode.children[i - 1].keys.removeAt(currNode.children[i - 1].keys.size - 1))
-                        currNode.data.add(i - 1, currNode.children[i - 1].data.removeAt(currNode.children[i - 1].data.size - 1))
+                        currNode.keys[i - 1] = currNode.children[i - 1].keys.removeAt(currNode.children[i - 1].keys.size - 1)
+                        currNode.data[i - 1] = currNode.children[i - 1].data.removeAt(currNode.children[i - 1].data.size - 1)
 
                         currNode.children[i].keys.add(0, key_parent)
                         currNode.children[i].data.add(0, data_parent)
 
                         currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
-                    } else { // добавить еще один случай
-                        currNode.children[i].keys.add(currNode.keys.removeAt(i))
-                        currNode.children[i].data.add(currNode.data.removeAt(i))
+                        remove(key, currNode)
+                    } else {
+                        //ни в право ни в левом взять ключ нельзя
+                        //придется мерджить с одним из соседей
 
-                        while (!currNode.children[i + 1].keys.isEmpty()) {
-                            currNode.children[i].keys.add(currNode.children[i + 1].keys.removeAt(0))
-                            currNode.children[i].data.add(currNode.children[i + 1].data.removeAt(0))
+                        if (i + 1 < currNode.children.size) {
+                            currNode.children[i].keys.add(currNode.keys.removeAt(i))
+                            currNode.children[i].data.add(currNode.data.removeAt(i))
+
+                            while (!currNode.children[i + 1].keys.isEmpty()) {
+                                currNode.children[i].keys.add(currNode.children[i + 1].keys.removeAt(0))
+                                currNode.children[i].data.add(currNode.children[i + 1].data.removeAt(0))
+                            }
+
+                            while (!currNode.children[i + 1].children.isEmpty()) {
+                                currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
+                            }
+                            currNode.children.removeAt(i + 1)
+
+                            remove(key, currNode.children[i])
+                        } else {
+                            //мерджим с левым
+                            currNode.keys.add(currNode.keys.removeAt(i - 1))
+                            currNode.children[i].data.add(currNode.data.removeAt(i - 1))
+
+                            while (!currNode.children[i - 1].keys.isEmpty()) {
+                                currNode.children[i].keys.add(0, currNode.children[i - 1].keys.removeAt(currNode.children[i - 1].keys.size - 1))
+                                currNode.children[i].data.add(0, currNode.children[i - 1].data.removeAt(currNode.children[i - 1].data.size - 1))
+                            }
+
+                            while (!currNode.children[i - 1].children.isEmpty()) {
+                                currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
+                            }
+                            currNode.children.removeAt(i - 1)
+                            remove(key, currNode)
                         }
-
-                        while (!currNode.children[i + 1].children.isEmpty()) {
-                            currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
-                        }
-
-                        currNode.children.removeAt(i + 1)
                     }
 
             }
