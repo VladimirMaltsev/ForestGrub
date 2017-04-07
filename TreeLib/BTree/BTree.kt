@@ -165,7 +165,7 @@ class BTree<Key : Comparable<Key>, Data> {
                 return
 
             if (currNode.children[i].keys.size < BTree.MIN_DIG) {
-                if (currNode.children[i + 1].keys.size >= BTree.MIN_DIG) {
+                if (i < currNode.children.size && currNode.children[i + 1].keys.size >= BTree.MIN_DIG) {
                     var key_parent = currNode.keys[i]
                     var data_parent = currNode.data[i]
 
@@ -177,7 +177,7 @@ class BTree<Key : Comparable<Key>, Data> {
 
                     currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
                 } else
-                    if (currNode.children[i - 1].keys.size >= BTree.MIN_DIG) {
+                    if (i - 1 >= 0 && currNode.children[i - 1].keys.size >= BTree.MIN_DIG) {
                         var key_parent = currNode.keys[i - 1]
                         var data_parent = currNode.data[i - 1]
 
@@ -188,7 +188,7 @@ class BTree<Key : Comparable<Key>, Data> {
                         currNode.children[i].data.add(0, data_parent)
 
                         currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
-                    } else {
+                    } else { // добавить еще один случай
                         currNode.children[i].keys.add(currNode.keys.removeAt(i))
                         currNode.children[i].data.add(currNode.data.removeAt(i))
 
