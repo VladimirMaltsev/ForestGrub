@@ -121,7 +121,6 @@ class BTree<Key : Comparable<Key>, Data> {
             } else {
 
                 //иначе ищем приемника
-
                 var node_victim = currNode
 
                 //попытка отжать ключ у левого ребенка
@@ -256,11 +255,14 @@ class BTree<Key : Comparable<Key>, Data> {
                         }
                     }
 
-            } else 
+            } else
                 remove(key, currNode.children[i])
 
 
         }
+        if (root.isEmpty())
+            if (!root.children.isEmpty())
+                root = root.children.removeAt(0)
 
     }
 
