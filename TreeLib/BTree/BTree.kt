@@ -175,7 +175,7 @@ class BTree<Key : Comparable<Key>, Data> {
                 }
             }
         } else { //если же ключ не найден
-
+            println("key not found")
             //если лист - все плохо его нет
             if (currNode.isLeaf())
                 return
@@ -198,8 +198,10 @@ class BTree<Key : Comparable<Key>, Data> {
 
                     currNode.children[i].keys.add(key_parent)
                     currNode.children[i].data.add(data_parent)
-                    currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
-                    remove(key, currNode)
+
+                    if (!currNode.children[i].isLeaf())
+                        currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
+                    remove(key, currNode.children[i])
                 } else
 
                     //у правого не получилось, может у левого получиться
@@ -212,9 +214,9 @@ class BTree<Key : Comparable<Key>, Data> {
 
                         currNode.children[i].keys.add(0, key_parent)
                         currNode.children[i].data.add(0, data_parent)
-
-                        currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
-                        remove(key, currNode)
+                        if (!currNode.children[i - 1].isLeaf())
+                            currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
+                        remove(key, currNode.children[i])
                     } else {
                         //ни в право ни в левом взять ключ нельзя
                         //придется мерджить с одним из соседей
@@ -228,9 +230,10 @@ class BTree<Key : Comparable<Key>, Data> {
                                 currNode.children[i].data.add(currNode.children[i + 1].data.removeAt(0))
                             }
 
-                            while (!currNode.children[i + 1].children.isEmpty()) {
-                                currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
-                            }
+                            if (!currNode.children[i + 1].isLeaf())
+                                while (!currNode.children[i + 1].children.isEmpty()) {
+                                    currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
+                                }
                             currNode.children.removeAt(i + 1)
 
                             remove(key, currNode.children[i])
@@ -244,15 +247,18 @@ class BTree<Key : Comparable<Key>, Data> {
                                 currNode.children[i].data.add(0, currNode.children[i - 1].data.removeAt(currNode.children[i - 1].data.size - 1))
                             }
 
-                            while (!currNode.children[i - 1].children.isEmpty()) {
-                                currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
-                            }
+                            if (!currNode.children[i - 1].isLeaf())
+                                while (!currNode.children[i - 1].children.isEmpty()) {
+                                    currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
+                                }
                             currNode.children.removeAt(i - 1)
                             remove(key, currNode)
                         }
                     }
 
-            }
+            } else 
+                remove(key, currNode.children[i])
+
 
         }
 
