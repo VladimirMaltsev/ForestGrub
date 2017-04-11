@@ -8,7 +8,4 @@ interface Tree <Key : Comparable<Key>, Data> {
 
         fun remove(key: Key): Boolean
 
-        //fun printPostOrder(curNode: Node<Key, Data>? = root, divider: String = "")
-
-        //fun printLevelOrder()
 }
