@@ -1,5 +1,6 @@
 package ForestGun.TreeLib
 
+import ForestGun.TreeUtils.*
 import TreeLib.RBNode
 import TreeLib.*
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int
@@ -42,7 +43,7 @@ class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
                         else
                             spec_symbol = "/"
 
-                    println("$spec_symbol${27.toChar()}${if (node.isRed) "[31m" else "[1m"}${node.data}${27.toChar()}[0m")
+                    println("$spec_symbol${27.toChar()}${if (node.color == COLOR.RED) "[31m" else "[1m"}${node.data}${27.toChar()}[0m")
                 }
             }
         }
