@@ -3,7 +3,7 @@ package BTreeLib
 import java.util.*
 
 
-class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree{
+class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key, Data>, Iterable<RBNode<Key, Data>>{
 
     private var root: BNode<Key, Data> = BNode()
 
