@@ -3,7 +3,7 @@ package BTreeLib
 import java.util.*
 
 
-class BTree<Key : Comparable<Key>, Data> {
+class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree{
 
     private var root: BNode<Key, Data> = BNode()
 
@@ -12,6 +12,7 @@ class BTree<Key : Comparable<Key>, Data> {
     }
 
     fun isEmpty() = root.keys.size == 0
+    fun getRoot() = root
 
     fun search(key: Key): Data? {
         var node = searchNode(key = key) ?: return null
@@ -99,8 +100,6 @@ class BTree<Key : Comparable<Key>, Data> {
     }
 
     fun remove (key: Key, currNode : BNode<Key, Data> = root) {
-        println(key)
-
         //находим ключ который >= key
         var i = 0
         while (i < currNode.keys.size && key > currNode.keys[i]) {
@@ -108,13 +107,11 @@ class BTree<Key : Comparable<Key>, Data> {
         }
 
         //в случае если ключ найден
+        if (i < currNode.keys.size && key == currNode.keys[i]) {
 
-        if (i < currNode.keys.size && key == currNode.keys[i])
-        {
             //если лист то просто удаляем
-
             if (currNode.isLeaf()) {
-                println("I'm leaf")
+
                 currNode.keys.removeAt(i)
                 currNode.data.removeAt(i)
             } else {
@@ -295,5 +292,30 @@ class BTree<Key : Comparable<Key>, Data> {
 
     }
 
+    override fun iterator(): Iterator<BNode<Key, Data>> {
+        return (object : Iterator<BNode<Key, Data>>
+        {
+            var nodes : Queue<BNode<Key, Data>> = LinkedList()
+
+            init {
+                if (!root.isEmpty())
+                    nodes.add(root)
+            }
+            override fun hasNext(): Boolean {
+                return nodes.isEmpty()
+            }
+
+            override fun next(): BNode<Key, Data> {
+                var curNode = nodes.poll()
+                if (!curNode.isLeaf()) {
+                    for (child in curNode.children) {
+                        nodes.add(child)
+                    }
+                }
+                return curNode
+            }
+
+        })
+    }
 
 }
