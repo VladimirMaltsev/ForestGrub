@@ -3,13 +3,9 @@ package BTreeLib
 import java.util.*
 
 
-class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key, Data>, Iterable<RBNode<Key, Data>>{
+class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode<Key, Data>>{
 
     private var root: BNode<Key, Data> = BNode()
-
-    companion object {
-        public const val MIN_DIG: Int = 3
-    }
 
     fun isEmpty() = root.keys.size == 0
     fun getRoot() = root
@@ -67,7 +63,7 @@ class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key
     }
 
     fun insert(key: Key, data: Data) {
-        if (root.isFull()) {
+        if (root.keys.size == 2 * MIN_DIG - 1) {
             var newRoot = BNode<Key, Data>()
             newRoot.children.add(root)
             splitNode(newRoot, 0, root)
@@ -88,7 +84,7 @@ class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key
             currNode.data.add(i, data)
         } else {
 
-            if (currNode.children[i].isFull()) {
+            if (currNode.children[i].keys.size == 2 * MIN_DIG - 1) {
                 splitNode(currNode, i, currNode.children[i])
                 if (key > currNode.keys[i]) {
                     i++
@@ -180,11 +176,11 @@ class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key
             //поэтому надо следить за тем, чтобы ключей в каждой вершине по пути следования было
             // >= чем минимальная степень дерева
 
-            if (currNode.children[i].keys.size < BTree.MIN_DIG) {
+            if (currNode.children[i].keys.size < MIN_DIG) {
 
                 //пытаемся подрезать ключ у правого соседа
                 //если мы сами не являемся ультраправыми
-                if (i + 1 < currNode.children.size && currNode.children[i + 1].keys.size >= BTree.MIN_DIG) {
+                if (i + 1 < currNode.children.size && currNode.children[i + 1].keys.size >= MIN_DIG) {
                     var key_parent = currNode.keys[i]
                     var data_parent = currNode.data[i]
 
@@ -200,7 +196,7 @@ class BTree<Key : Comparable<Key>, Data> : Iterable<BNode<Key, Data>> : Tree<Key
                 } else
 
                     //у правого не получилось, может у левого получиться
-                    if (i - 1 >= 0 && currNode.children[i - 1].keys.size >= BTree.MIN_DIG) {
+                    if (i - 1 >= 0 && currNode.children[i - 1].keys.size >= MIN_DIG) {
                         var key_parent = currNode.keys[i - 1]
                         var data_parent = currNode.data[i - 1]
 
