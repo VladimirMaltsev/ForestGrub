@@ -24,21 +24,9 @@ internal class RBTreeTest {
     }
 
     @Test
-    fun removeByExistingKey() {
-        var rbTree = initTree(10)
-        rbTree.remove(5)
-    }
-
-    @Test
     fun searchByNotExistingKey() {
         var rbTree = initTree(10)
         rbTree.search(15)
-    }
-
-    @Test
-    fun removeByNotExistingKey() {
-        var rbTree = initTree(10)
-        rbTree.remove(15)
     }
 
     @Test
@@ -48,10 +36,30 @@ internal class RBTreeTest {
     }
 
     @Test
+    fun removeByExistingKey() {
+        var rbTree = initTree(10)
+        rbTree.remove(5)
+    }
+
+    @Test
+    fun removeByNotExistingKey() {
+        var rbTree = initTree(10)
+        rbTree.remove(15)
+    }
+
+    @Test
     fun removeFromEmptyTree() {
         var rbTree = RBTree<Int, Int>()
         rbTree.remove(10)
     }
+
+    @Test
+    fun Insert1000000Remove1000000() {
+        var rbTree = initTree(100000)
+        for (i in 0..100000)
+            rbTree.remove(i)
+    }
+
 
     fun initTree(size : Int) : RBTree<Int, Int>{
         var rbTree = RBTree<Int, Int>()
