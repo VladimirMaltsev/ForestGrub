@@ -10,7 +10,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
     fun isEmpty() = root.keys.size == 0
     fun getRoot() = root
 
-    fun search(node : BNode<Key, Data>, key: Key): Data? {
+    fun search( key: Key, node : BNode<Key, Data> = root): Data? {
 
         var i = 0
         while (i < node.keys.size && key > node.keys[i]) {
@@ -22,7 +22,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
         if (node.isLeaf())
             return null
 
-        return search(node.children[i], key)
+        return search(key, node.children[i])
     }
 
     private fun splitNode(parent: BNode<Key, Data>, i_median: Int, splitChild: BNode<Key, Data>) {
@@ -146,7 +146,6 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                 }
             }
         } else { //если же ключ не найден
-            println("key not found")
             //если лист - все плохо его нет
             if (currNode.isLeaf())
                 return
