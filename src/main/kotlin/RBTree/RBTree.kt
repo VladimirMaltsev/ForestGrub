@@ -1,6 +1,7 @@
 package TreeLib
 
 import ForestGun.TreeLib.COLOR
+import ForestGun.TreeLib.TreePrinter
 import ForestGun.TreeUtils.*
 
 class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key, Data>> {
@@ -226,6 +227,7 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
         var isNull = isNullProf
         var node = currNode
         while (isNull || node != root && node!!.color == COLOR.BLACK) {
+          //  println(node!!.parent?.key)
             //println("isNull = $isNull , node.data = ${node!!.data} , node.parent = ${node.parent}")
             if (node!!.parent!!.leftChild == node || node.parent!!.leftChild == null) {
                 var broNode = node.parent!!.rightChild
@@ -241,10 +243,11 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
                 //во всех оставшихся случаех бро-узел черный
 
                 //если оба племянника черные, то меняем цвет бро-узла на красный и скидываем проблему на родителя
-                if (!(broNode!!.leftChild != null &&
-                        broNode.rightChild != null &&
-                        broNode.rightChild!!.color == COLOR.BLACK &&
-                        broNode.leftChild!!.color == COLOR.BLACK)) {
+                if ((broNode!!.leftChild == null ||
+                        broNode.leftChild!!.color == COLOR.BLACK) &&
+                        (broNode.rightChild == null ||
+                                broNode.rightChild!!.color == COLOR.BLACK))
+                {
                     broNode.color = COLOR.RED
                     node = node.parent
                 } else {
@@ -265,7 +268,6 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
             } else  //все тоже самое, только зеркально отраженное leftChild = rightChild
             {       //                                            rotateLeft = rotateRight и наоборот
                 var broNode = node.parent!!.leftChild
-
                 if (broNode!!.color == COLOR.RED) {
 
                     broNode.color = COLOR.BLACK
@@ -273,12 +275,11 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
                     rotateRight(node.parent!!)
                     broNode = node.parent!!.leftChild
                 }
-
-                if (!(broNode!!.leftChild != null &&
-                        broNode.rightChild != null &&
-                        broNode.rightChild!!.color == COLOR.BLACK &&
-                        broNode.leftChild!!.color == COLOR.BLACK)) {
-
+                if ((broNode!!.leftChild == null ||
+                        broNode.leftChild!!.color == COLOR.BLACK) &&
+                        (broNode.rightChild == null ||
+                        broNode.rightChild!!.color == COLOR.BLACK))
+                {
                     broNode.color = COLOR.RED
                     node = node.parent
                 } else {
