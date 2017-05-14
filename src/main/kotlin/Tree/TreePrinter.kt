@@ -3,11 +3,11 @@ package ForestGun.TreeLib
 import ForestGun.TreeUtils.*
 import TreeLib.RBNode
 import TreeLib.*
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int
 
 class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
 
-    public val POSTORDER = 2
+    public val POST_ORDER = 2
+    public val INFO_ABOUT_EACH_NODE = 1
 
     var getNextPostOrder: (RBNode<Key, Data>?) -> RBNode<Key, Data>? = {
         var node = it;
@@ -25,7 +25,7 @@ class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
     public fun printTree(case: Int) {
         when (case)
         {
-            POSTORDER ->
+            POST_ORDER ->
             {
                 val iterator = tree.iterator(getNextPostOrder)
                 while (iterator.hasNext())
@@ -45,6 +45,19 @@ class TreePrinter<Key :Comparable<Key>, Data> (var tree : RBTree<Key, Data>) {
 
                     println("$spec_symbol${27.toChar()}${if (node.color == COLOR.RED) "[31m" else "[1m"}${node.data}${27.toChar()}[0m")
                 }
+            }
+            INFO_ABOUT_EACH_NODE -> {
+                val iterator = tree.iterator(getNextPostOrder)
+                while (iterator.hasNext())
+                {
+                    var node = iterator.next()
+                    println("node key = ${node.key}")
+                    println("node parent = ${node.parent?.key}")
+                    println("node leftChild = ${node.leftChild?.key}")
+                    println("node rightChild = ${node.rightChild?.key}")
+                    println()
+                }
+
             }
         }
     }

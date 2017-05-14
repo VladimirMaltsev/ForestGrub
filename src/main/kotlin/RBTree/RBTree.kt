@@ -90,7 +90,7 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
         //определение узла, который будет удален
         var deletedNode: RBNode<Key, Data>? = victimNode
 
-        if ((deletedNode!!.leftChild != null) && (deletedNode.rightChild != null)) {
+        if (deletedNode!!.leftChild != null && deletedNode.rightChild != null) {
 
             deletedNode = victimNode.rightChild
 
@@ -146,6 +146,7 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
             heirNode.parent?.leftChild = heirNode
         } else
             heirNode.parent?.rightChild = heirNode
+        centerNode.rightChild?.parent = centerNode
     }
 
     private fun rotateRight(centerNode: RBNode<Key, Data>) {
@@ -166,6 +167,7 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
             heirNode.parent?.leftChild = heirNode
         } else
             heirNode.parent?.rightChild = heirNode
+        centerNode.leftChild?.parent = centerNode
     }
 
     private fun balanceTreeAfterInsert(node: RBNode<Key, Data>) {
@@ -229,7 +231,7 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
                 var broNode = node.parent!!.rightChild
 
                 //если бро-узел красный, то у него есть два черных потомка => сводим к случаю когда бро-узел черный
-                if (broNode!!.color == COLOR.RED) {
+                if (broNode != null && broNode.color == COLOR.RED) {
 
                     broNode.color = COLOR.BLACK
                     node.parent!!.color = COLOR.RED
@@ -241,8 +243,8 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
                 //если оба племянника черные, то меняем цвет бро-узла на красный и скидываем проблему на родителя
                 if (!(broNode!!.leftChild != null &&
                         broNode.rightChild != null &&
-                        broNode.rightChild!!.color == COLOR.RED &&
-                        broNode.leftChild!!.color == COLOR.RED)) {
+                        broNode.rightChild!!.color == COLOR.BLACK &&
+                        broNode.leftChild!!.color == COLOR.BLACK)) {
                     broNode.color = COLOR.RED
                     node = node.parent
                 } else {
@@ -274,8 +276,8 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
 
                 if (!(broNode!!.leftChild != null &&
                         broNode.rightChild != null &&
-                        broNode.rightChild!!.color == COLOR.RED &&
-                        broNode.leftChild!!.color == COLOR.RED)) {
+                        broNode.rightChild!!.color == COLOR.BLACK &&
+                        broNode.leftChild!!.color == COLOR.BLACK)) {
 
                     broNode.color = COLOR.RED
                     node = node.parent
@@ -320,6 +322,4 @@ class RBTree<Key : Comparable<Key>, Data> : Tree<Key, Data>, Iterable<RBNode<Key
             }
         })
     }
-
-
 }

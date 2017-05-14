@@ -8,5 +8,5 @@ class BNode<Key : Comparable<Key>, Data> {
 
     fun isLeaf () = children.size == 0
 
-    fun isFull () = keys.size == 2 * BTree.MIN_DIG - 1
+    fun isEmpty () = keys.size == 0
 }
