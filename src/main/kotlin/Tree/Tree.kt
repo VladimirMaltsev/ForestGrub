@@ -7,5 +7,4 @@ interface Tree <Key : Comparable<Key>, Data> {
         fun search(key: Key): Data?
 
         fun remove(key: Key): Boolean
-
 }

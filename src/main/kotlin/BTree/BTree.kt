@@ -1,16 +1,21 @@
 package BTreeLib
 
+import TreeLib.Tree
 import java.util.*
 
 
-class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode<Key, Data>>{
+class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode<Key, Data>>, Tree<Key, Data> {
 
     private var root: BNode<Key, Data> = BNode()
 
     fun isEmpty() = root.keys.size == 0
     fun getRoot() = root
 
-    fun search( key: Key, node : BNode<Key, Data> = root): Data? {
+    override fun search (key: Key) : Data? {
+        return searchRecursion(key, root)
+    }
+
+    fun searchRecursion( key: Key, node : BNode<Key, Data> = root): Data? {
 
         var i = 0
         while (i < node.keys.size && key > node.keys[i]) {
@@ -22,7 +27,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
         if (node.isLeaf())
             return null
 
-        return search(key, node.children[i])
+        return searchRecursion(key, node.children[i])
     }
 
     private fun splitNode(parent: BNode<Key, Data>, i_median: Int, splitChild: BNode<Key, Data>) {
@@ -42,7 +47,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
         parent.data.add(i_median, splitChild.data.removeAt(MIN_DIG - 1))
     }
 
-    fun insert(key: Key, data: Data) {
+    override fun insert(key: Key, data: Data) {
         if (root.keys.size == 2 * MIN_DIG - 1) {
             var newRoot = BNode<Key, Data>()
             newRoot.children.add(root)
@@ -75,7 +80,11 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
         }
     }
 
-    fun remove (key: Key, currNode : BNode<Key, Data> = root) {
+    override fun remove(key: Key): Boolean {
+        return removeRecursion(key, root)
+    }
+
+    fun removeRecursion (key: Key, currNode : BNode<Key, Data> = root) : Boolean{
         //находим ключ который >= key
         var i = 0
         while (i < currNode.keys.size && key > currNode.keys[i]) {
@@ -90,6 +99,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
 
                 currNode.keys.removeAt(i)
                 currNode.data.removeAt(i)
+                return true
             } else {
 
                 //иначе ищем приемника
@@ -105,7 +115,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                     var new_key = node_victim.keys[node_victim.keys.size - 1]
                     var new_data = node_victim.data[node_victim.data.size - 1]
 
-                    remove(new_key, currNode)
+                    removeRecursion(new_key, currNode)
 
                     currNode.keys[i] = new_key
                     currNode.data[i] = new_data
@@ -120,7 +130,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                         var new_key = node_victim.keys[0]
                         var new_data = node_victim.data[0]
 
-                        remove(new_key, currNode)
+                        removeRecursion(new_key, currNode)
 
                         currNode.keys[i] = new_key
                         currNode.data[i] = new_data
@@ -141,14 +151,14 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                         currNode.keys.removeAt(i)
                         currNode.data.removeAt(i)
                         currNode.children.removeAt(i + 1)
-                        remove(key, currNode.children[i])
+                        removeRecursion(key, currNode.children[i])
                     }
                 }
             }
         } else { //если же ключ не найден
             //если лист - все плохо его нет
             if (currNode.isLeaf())
-                return
+                return false
 
             //далее мы должны пойти в ребенка с индексом i
             //при этом мы должны быть уверены, что удалив там ключ, у нас не нарушится структура,
@@ -171,7 +181,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
 
                     if (!currNode.children[i].isLeaf())
                         currNode.children[i].children.add(currNode.children[i + 1].children.removeAt(0))
-                    remove(key, currNode.children[i])
+                    removeRecursion(key, currNode.children[i])
                 } else
 
                     //у правого не получилось, может у левого получиться
@@ -186,7 +196,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                         currNode.children[i].data.add(0, data_parent)
                         if (!currNode.children[i - 1].isLeaf())
                             currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
-                        remove(key, currNode.children[i])
+                        removeRecursion(key, currNode.children[i])
                     } else {
                         //ни в право ни в левом взять ключ нельзя
                         //придется мерджить с одним из соседей
@@ -206,7 +216,7 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                                 }
                             currNode.children.removeAt(i + 1)
 
-                            remove(key, currNode.children[i])
+                            removeRecursion(key, currNode.children[i])
                         } else {
                             //мерджим с левым
                             currNode.keys.add(currNode.keys.removeAt(i - 1))
@@ -222,19 +232,20 @@ class BTree<Key : Comparable<Key>, Data>(val MIN_DIG : Int = 3) : Iterable<BNode
                                     currNode.children[i].children.add(0, currNode.children[i - 1].children.removeAt(currNode.children[i - 1].children.size - 1))
                                 }
                             currNode.children.removeAt(i - 1)
-                            remove(key, currNode)
+                            removeRecursion(key, currNode)
                         }
                     }
 
             } else
-                remove(key, currNode.children[i])
+                removeRecursion(key, currNode.children[i])
 
 
         }
         if (root.isEmpty())
-            if (!root.children.isEmpty())
+            if (!root.children.isEmpty()) {
                 root = root.children.removeAt(0)
-
+            }
+        return false
     }
 
     fun printTree() {
